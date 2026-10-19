@@ -1,13 +1,16 @@
+package Services;
+
 import Connections.Conector;
 import Models.Videojuego;
-import com.sun.jdi.connect.Connector;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
-public class Services {
+public class ServicesVideojuego {
     public static void añadirVideojuego(Videojuego v) {
         String sql = "INSERT INTO  Videoxogo(Titulo, Plataforma,AnoLanzamento,Descripcion) VALUES (?, ?, ?, ?)";
         //hacer con gets
@@ -41,24 +44,52 @@ public class Services {
             toInsert.setString(4, v.getDescripcion());
 
             toInsert.executeUpdate();
-            System.out.println("Videojuego insertado con éxito.");
+            System.out.println("Videojuego actualización con éxito.");
 
         } catch (SQLException e) {
-            System.out.println("Error al insertar: " + e.getMessage());
+            System.out.println("Error al actualizar: " + e.getMessage());
         }
 
     }
     //leer
-    public static void  leerVideojuego(){
-        String sql = "SELECT Titulo, Plataforma,AnoLanzamento,Descripcion FROM  Videoxogo VALUES";
+    public static List<Videojuego> leerVideojuego(){
+        String sql = "SELECT * FROM  Videoxogo VALUES";
+        List<Videojuego> toRet = new ArrayList<>();
 
         try (Connection conn = Conector.conexion();
              PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet lista = ps.executeQuery()) {
-
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                toRet.add(new Videojuego(
+                                rs.getInt("Id"),
+                                rs.getString("Titulo"),
+                                rs.getString("Plataforma"),
+                                rs.getInt("AnoLanzamento"),
+                                rs.getString("Descripcion")
+                        )
+                );
+            }
         } catch (SQLException e) {
-            System.out.println("Error al insertar: " + e.getMessage());
+            System.out.println("Error al leer: " + e.getMessage());
         }
+        return toRet;
     }
 
+    public static void eliminarVideojuego(Videojuego v) {
+        String sql = "DELETE FROM Videoxogo Where Titulo = ?";
+
+        try (Connection conn = Conector.conexion();
+             PreparedStatement delete = conn.prepareStatement(sql)) {
+
+            delete.setString(1, v.getTitulo());
+
+
+            delete.executeUpdate();
+            System.out.println("Videojuego eliminado.");
+
+        } catch (SQLException e) {
+            System.out.println("Error al eliminar: " + e.getMessage());
+        }
+
+    }
 }
